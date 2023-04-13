@@ -6,30 +6,57 @@ namespace Game.GameSystem.Player
 {
     public class PlayerRaycast : MonoBehaviour
     {
+        [Header("Raycast Settings")]
         [SerializeField] Transform camPos;
+        [SerializeField] float raycastDistance = 10f;
         RaycastHit hit;
         [SerializeField] LayerMask hitLayerMask;
-        [SerializeField] Texture2D cursorTexture;
+        [SerializeField] KeyCode interactKeycode = KeyCode.E;
 
-        private void Awake()
-        {
-            Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);
-        }
-
+#if UNITY_EDITOR
+        [Header("Gizmos Settings")]
+        [SerializeField] Color colorInHit = Color.green;
+        [SerializeField] Color colorOutHit = Color.red;
+#endif
         void Update()
         {
-            Debug.Log(hit.transform);
+            if (!InteractLogic()) return;
+            PlayerInteract();
+        }
+
+        bool InteractLogic()
+        { 
+            if (!Input.GetKeyDown(interactKeycode)) return false;
+            if (hit.transform == null) return false;
+            return true;
+        }
+
+        void PlayerInteract()
+        {
+            if (hit.transform.TryGetComponent(out Interact.IInteract _component))
+            {
+                _component.Interact();
+            }
+            else
+            {
+                Debug.LogWarning($"<color=red>{hit.transform.name}</color> game object doesn't have <color=Color.white>IInteract (Interact Interface)</color> implemented");
+            }
         }
 
         private void FixedUpdate()
         {
-            Physics.Raycast(camPos.position, camPos.transform.forward, out hit, 200f, hitLayerMask);
+            Physics.Raycast(camPos.position, camPos.transform.forward, out hit, raycastDistance, hitLayerMask);
+#if UNITY_EDITOR
+            Debug.DrawRay(camPos.position, camPos.transform.forward * raycastDistance, hit.transform == null ? colorOutHit : colorInHit);
+#endif
         }
+    }
+}
 
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(camPos.position, camPos.transform.forward * 200f);
-        }
+namespace Game.GameSystem.Interact
+{
+    public interface IInteract
+    {
+        void Interact();
     }
 }
