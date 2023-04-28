@@ -39,7 +39,7 @@ namespace Game.GameSystem.Player
             }
             else
             {
-                Debug.LogWarning($"<color=red>{hit.transform.name}</color> game object doesn't have <color=Color.white>IInteract (Interact Interface)</color> implemented");
+                Debug.Log($"{hit.transform.name.StringColor(Color.red)} game object doesn't have {"IInteract".StringColor(Color.white)} implemented");
             }
         }
 

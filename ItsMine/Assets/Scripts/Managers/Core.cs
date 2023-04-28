@@ -16,21 +16,6 @@ namespace Game.Core
         Casaco
     }
 
-    [System.Serializable]
-    public enum Colors
-    {
-        Black,
-        White,
-        Gray,
-        Red,
-        Green,
-        Blue,
-        Yellow,
-        Orange,
-        Purple,
-        Pink,
-        Brown
-    }
 
     [System.Serializable]
     public enum Shifts
@@ -96,15 +81,15 @@ namespace Game.Core
     public class Item
     {
         [SerializeField] ItemType itemType;
-        [SerializeField] Colors itemColor;
         [SerializeField] Shifts shift;
         [SerializeField] Courses course;
         [SerializeField] Period period;
+
+        [Header("Informações")]
         [SerializeField] Registration ownerRegister;
-        string description;
+        [SerializeField] string description;
         #region Getters
         public ItemType ItemType => itemType;
-        public Colors ItemColor => itemColor;
         public Shifts Shift => shift;
         public Courses Course => course;
         public Period Period => period;
@@ -114,15 +99,15 @@ namespace Game.Core
 
         #endregion
 
-        public void Setup(ItemType _itemType, Colors _itemColor, Shifts _shift, Courses _course, Period _period, Registration _reg = null)
+        public void Setup(ItemType _itemType, Shifts _shift, Courses _course, Period _period, Registration _reg = null)
         {
+            ownerRegister ??= new();
             itemType = _itemType;
-            itemColor = _itemColor;
             shift = _shift;
             course = _course;
             period = _period;
             SetDescription();
-            SetRegistration(_reg);
+            SetRegistration();
         }
 
         void SetDescription()

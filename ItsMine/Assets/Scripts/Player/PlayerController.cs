@@ -24,6 +24,9 @@ namespace Game.GameSystem.Player
         Vector3 inputs;
         Rigidbody rig;
 
+        [Header("Editor Only")]
+        bool followMouse = true;
+
 
         private void Awake()
         {
@@ -50,6 +53,10 @@ namespace Game.GameSystem.Player
         void Move()
         {
             playerTransform.Rotate(0, rX, 0, Space.World);
+
+            if (Input.GetKeyDown(KeyCode.P)) followMouse = !followMouse;
+            if (!followMouse) return;
+
             cam.rotation = Quaternion.Lerp(cam.rotation, Quaternion.Euler(rY * mouseSense.y, playerTransform.eulerAngles.y, 0f), mouseSmoothness * Time.deltaTime);
             camPivot.position = Vector3.Lerp(camPivot.position, playerTransform.position, moveSpeed * Time.deltaTime);
         }
