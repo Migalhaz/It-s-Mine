@@ -5,14 +5,14 @@ using UnityEngine;
 namespace Game.GameSystem.Itens
 {
     using Core;
-    public class ItemScript : MonoBehaviour
+    using Interact;
+    public class ItemScript : MonoBehaviour, IInteract
     {
         [ContextMenuItem("Generate Item", nameof(GenerateItem))]
         [Header("Dados do Item")]
         [SerializeField] Item item;
         public Item Item => item;
         GameObject model;
-
         private void Start()
         {
             item = new();
@@ -41,10 +41,20 @@ namespace Game.GameSystem.Itens
         {
             if (model != null) DestroyImmediate(model);
 
-            model = ItemManager.Instance.GetModel(item.ItemType);
+            model = ItemManager.Instance.GetModel(item.ItemType, out BoxColliderSettings _colliderSettings);
 
             if (model == null) return;
             model = Instantiate(model, transform);
+            BoxCollider _collider = GetComponent<BoxCollider>();
+            _collider.size = _colliderSettings.colliderSize;
+            _collider.center = _colliderSettings.colliderOffset;
+        }
+
+        public void Interact()
+        {
+            Debug.Log($"{"Interact function".StringColor(Color.red)} is not implemented! Script: {"ItemScript".StringColor(Color.yellow)}");
+
+            //This func must show itemDescription on UI
         }
     }
 }

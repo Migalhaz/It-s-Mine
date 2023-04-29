@@ -25,9 +25,12 @@ namespace Game.GameSystem.Itens
             }
         }
 
-        public GameObject GetModel(Core.ItemType _itemType)
+        public GameObject GetModel(Core.ItemType _itemType, out BoxColliderSettings _colliderSettings)
         {
-            GameObject _model = itemModel.Find(x => x.ItemType == _itemType)?.Model;
+            ItemModel _currentItem = itemModel.Find(x => x.ItemType == _itemType);
+
+            GameObject _model = _currentItem?.Model;
+            _colliderSettings = _currentItem?.BoxColliderSettings;
             if (_model == null)
             {
                 Debug.Log($"{_itemType}".StringColor(Color.red) + " doesn't have a model defined");
@@ -41,8 +44,17 @@ namespace Game.GameSystem.Itens
     {
         [SerializeField] Core.ItemType itemType;
         [SerializeField] GameObject model;
+        [SerializeField] BoxColliderSettings boxColliderSettings;
 
         public Core.ItemType ItemType => itemType;
         public GameObject Model => model;
+        public BoxColliderSettings BoxColliderSettings => boxColliderSettings;
+    }
+
+    [System.Serializable]
+    public class BoxColliderSettings
+    {
+        [field: SerializeField] public Vector3 colliderOffset { get; private set; }
+        [field: SerializeField] public Vector3 colliderSize { get; private set; }
     }
 }
