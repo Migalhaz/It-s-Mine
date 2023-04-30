@@ -12,7 +12,9 @@ namespace Game.GameSystem.Itens
         [SerializeField] IntRange itensRange;
         [SerializeField] GameObject itemGameObject;
         [SerializeField] List<Transform> spawnItensPoints;
+        [field: SerializeField] public Transform PlayerHand { get; private set; }
         List<Transform> availableSpawnPoints;
+        List<ItemScript> availableItens = new List<ItemScript>();
 
         private void Start()
         {
@@ -20,22 +22,45 @@ namespace Game.GameSystem.Itens
             for (int i = 0; i < itensRange.GetRandomValue(); i++)
             {
                 Transform _currentSpawnPoint = availableSpawnPoints.GetRandom();
-                Instantiate(itemGameObject, _currentSpawnPoint.position, _currentSpawnPoint.rotation);
+                availableItens.Add(Instantiate(itemGameObject, _currentSpawnPoint.position, _currentSpawnPoint.rotation).GetComponent<ItemScript>());
                 availableSpawnPoints.Remove(_currentSpawnPoint);
+            }
+
+            Debug.Log("Testando Cor".Color("#FFC0CB"));
+            Debug.Log("Testando Cor".Color("FFC0CB"));
+        }
+
+        public void GetModel(Core.ItemType _itemType, GameObject _model)
+        {
+            ItemModel _currentItem = itemModel.Find(x => x.ItemType == _itemType);
+            if (_currentItem == null)
+            {
+                Debug.Log($"{_itemType} doesn't have a model defined".Error());
+                return;
+            }
+            //GameObject _model = _currentItem?.Model;
+            _model.GetComponent<MeshFilter>().mesh = _currentItem?.Mesh;
+            _model.GetComponent<MeshRenderer>().material = _currentItem?.Material;
+
+            if (_currentItem.Mesh != null)
+            {
+                _model.AddComponent<BoxCollider>();
             }
         }
 
-        public GameObject GetModel(Core.ItemType _itemType, out BoxColliderSettings _colliderSettings)
+        public void ObjectDelivered(ItemScript _itemDelivered)
         {
-            ItemModel _currentItem = itemModel.Find(x => x.ItemType == _itemType);
-
-            GameObject _model = _currentItem?.Model;
-            _colliderSettings = _currentItem?.BoxColliderSettings;
-            if (_model == null)
+            if (!availableItens.Contains(_itemDelivered))
             {
-                Debug.Log($"{_itemType}".StringColor(Color.red) + " doesn't have a model defined");
+                Debug.LogWarning($"{_itemDelivered.name} isn't in the available itens list".Error());
+                return;
             }
-            return _model;
+            Destroy(_itemDelivered.gameObject);
+            availableItens.Remove(_itemDelivered);
+            if (availableItens.Count <= 0)
+            {
+                Debug.Log("Todos os itens foram entregues!".Color(Color.green));
+            }
         }
     }
     
@@ -44,17 +69,12 @@ namespace Game.GameSystem.Itens
     {
         [SerializeField] Core.ItemType itemType;
         [SerializeField] GameObject model;
-        [SerializeField] BoxColliderSettings boxColliderSettings;
+        [SerializeField] Mesh mesh;
+        [SerializeField] Material material;
 
         public Core.ItemType ItemType => itemType;
         public GameObject Model => model;
-        public BoxColliderSettings BoxColliderSettings => boxColliderSettings;
-    }
-
-    [System.Serializable]
-    public class BoxColliderSettings
-    {
-        [field: SerializeField] public Vector3 colliderOffset { get; private set; }
-        [field: SerializeField] public Vector3 colliderSize { get; private set; }
+        public Mesh Mesh => mesh;
+        public Material Material => material;
     }
 }

@@ -6,18 +6,25 @@ namespace Game.GameSystem.Player
 {
     public class PlayerRaycast : MonoBehaviour
     {
+        [Header("Input Manager")]
+        [SerializeField] PlayerInputs playerInputManager;
+
         [Header("Raycast Settings")]
         [SerializeField] Transform camPos;
         [SerializeField] float raycastDistance = 10f;
         RaycastHit hit;
         [SerializeField] LayerMask hitLayerMask;
-        [SerializeField] KeyCode interactKeycode = KeyCode.E;
-
+        
 #if UNITY_EDITOR
         [Header("Gizmos Settings")]
         [SerializeField] Color colorInHit = Color.green;
         [SerializeField] Color colorOutHit = Color.red;
 #endif
+        private void Awake()
+        {
+            playerInputManager ??= gameObject.TryGetComponent(out PlayerInputs _newPlayerInput) ? _newPlayerInput : gameObject.AddComponent<PlayerInputs>();
+        }
+
         void Update()
         {
             if (!InteractLogic()) return;
@@ -25,10 +32,11 @@ namespace Game.GameSystem.Player
         }
 
         bool InteractLogic()
-        { 
-            if (!Input.GetKeyDown(interactKeycode)) return false;
-            if (hit.transform == null) return false;
-            return true;
+        {
+            //if (!Input.GetKeyDown(interactKeycode)) return false;
+            //if (hit.transform == null) return false;
+            //return true
+            return (playerInputManager.InteractKeycodePressed() && hit.transform != null); 
         }
 
         void PlayerInteract()
@@ -39,7 +47,7 @@ namespace Game.GameSystem.Player
             }
             else
             {
-                Debug.Log($"{hit.transform.name.StringColor(Color.red)} game object doesn't have {"IInteract".StringColor(Color.white)} implemented");
+                Debug.Log($"{hit.transform.name.Color(Color.red)} game object doesn't have {"IInteract".Color(Color.white)} implemented");
             }
         }
 

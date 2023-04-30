@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Game.GameSystem.Itens
 {
@@ -9,15 +10,36 @@ namespace Game.GameSystem.Itens
     public class ItemScript : MonoBehaviour, IInteract
     {
         [ContextMenuItem("Generate Item", nameof(GenerateItem))]
+        [ContextMenuItem("Deliver Item", nameof(Interact))]
         [Header("Dados do Item")]
         [SerializeField] Item item;
         public Item Item => item;
         GameObject model;
-        private void Start()
+
+        [SerializeField] ScriptableObjects.EventScriptableObject onMouseButtonDown;
+        ItemManager itemManager;
+        Transform playerHand;
+        bool inHand;
+
+        private void Awake()
         {
+            inHand = false;
             item = new();
+            itemManager = ItemManager.Instance;
+            playerHand = itemManager.PlayerHand;
             GenerateItem();
+
         }
+
+        void Update()
+        {
+            if (!inHand) return;
+            transform.position = playerHand.position;
+            transform.rotation = playerHand.rotation;
+
+
+        }
+
         public void GenerateItem()
         {
             ItemType newItemType = (ItemType) Random.Range(0, typeof(ItemType).EnumLength());
@@ -39,21 +61,19 @@ namespace Game.GameSystem.Itens
 
         void UpdateModel()
         {
-            if (model != null) DestroyImmediate(model);
+            itemManager.GetModel(item.ItemType, gameObject);
+        }
 
-            model = ItemManager.Instance.GetModel(item.ItemType, out BoxColliderSettings _colliderSettings);
-
-            if (model == null) return;
-            model = Instantiate(model, transform);
-            BoxCollider _collider = GetComponent<BoxCollider>();
-            _collider.size = _colliderSettings.colliderSize;
-            _collider.center = _colliderSettings.colliderOffset;
+        void DropObject()
+        {
+            inHand = false;
         }
 
         public void Interact()
         {
-            Debug.Log($"{"Interact function".StringColor(Color.red)} is not implemented! Script: {"ItemScript".StringColor(Color.yellow)}");
-
+            Debug.Log($"{"Interact function".Color(Color.red)} is not implemented! Script: {"ItemScript".Color(Color.yellow)}");
+            inHand = true;
+            onMouseButtonDown += DropObject;
             //This func must show itemDescription on UI
         }
     }
@@ -99,9 +119,52 @@ public static class RangeExtend
 
 public static class StringExtend
 {
-    public static string StringColor(this string _string, Color _textColor)
+    public static string Color(this string _string, Color _textColor)
     {
         return $"<color=#{ColorUtility.ToHtmlStringRGBA(_textColor)}>{_string}</color>";
+    }
+
+    public static string Color(this string _string, string _textColorHex)
+    {
+        
+        string _colorString = _textColorHex;
+        if (_textColorHex.StartsWith('#'))
+        {
+            _colorString = _textColorHex.Split('#')[1];
+
+        }
+        return $"<color=#{_colorString}>{_string}</color>";
+    }
+
+    public static string Bold(this string _string)
+    {
+        return $"<b>{_string}</b>";
+    }
+
+    public static string Italic(this string _string)
+    {
+        return $"<i>{_string}</i>";
+    }
+
+    public static string Warning(this string _string)
+    {
+        return $"{"WARNING:".Bold().Color(UnityEngine.Color.yellow)} {_string.Italic()}";
+    }
+
+    public static string Error(this string _string)
+    {
+        return $"{"ERROR:".Bold().Color(UnityEngine.Color.red)} {_string.Italic()}";
+    }
+
+    public static string Teste(this string _string)
+    {
+        string _newString = "";
+
+        foreach (char c in _string.ToCharArray())
+        {
+            _newString += $"{c} ";
+        }
+        return _newString;
     }
 }
 
