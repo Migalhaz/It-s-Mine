@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace Game.GameSystem.Itens
         [field: SerializeField] public Transform PlayerHand { get; private set; }
         List<Transform> availableSpawnPoints;
         List<ItemScript> availableItens = new List<ItemScript>();
+        ItemScript itemInHand;
+        public ItemScript ItemInHand => itemInHand;
 
         private void Start()
         {
@@ -25,9 +28,6 @@ namespace Game.GameSystem.Itens
                 availableItens.Add(Instantiate(itemGameObject, _currentSpawnPoint.position, _currentSpawnPoint.rotation).GetComponent<ItemScript>());
                 availableSpawnPoints.Remove(_currentSpawnPoint);
             }
-
-            Debug.Log("Testando Cor".Color("#FFC0CB"));
-            Debug.Log("Testando Cor".Color("FFC0CB"));
         }
 
         public void GetModel(Core.ItemType _itemType, GameObject _model)
@@ -38,7 +38,6 @@ namespace Game.GameSystem.Itens
                 Debug.Log($"{_itemType} doesn't have a model defined".Error());
                 return;
             }
-            //GameObject _model = _currentItem?.Model;
             _model.GetComponent<MeshFilter>().mesh = _currentItem?.Mesh;
             _model.GetComponent<MeshRenderer>().material = _currentItem?.Material;
 
@@ -46,6 +45,11 @@ namespace Game.GameSystem.Itens
             {
                 _model.AddComponent<BoxCollider>();
             }
+        }
+
+        public void SetItemInHand(ItemScript _newItemInHand)
+        {
+            itemInHand = _newItemInHand;
         }
 
         public void ObjectDelivered(ItemScript _itemDelivered)

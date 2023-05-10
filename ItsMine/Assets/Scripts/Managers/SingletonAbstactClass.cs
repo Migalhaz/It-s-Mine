@@ -19,8 +19,8 @@ namespace Game.GameSystem.Singleton
 
                     if (instance == null)
                     {
-                        GameObject obj = new GameObject();
-                        obj.name = typeof(T).Name;
+                        GameObject obj = new GameObject(typeof(T).Name);
+                        //obj.name = typeof(T).Name;
                         instance = obj.AddComponent<T>();
                     }
                 }
@@ -32,7 +32,7 @@ namespace Game.GameSystem.Singleton
         {
             if (instance == null)
             {
-                instance = (T)this;
+                instance = (T) this;
 
                 if (!dontDestroyOnLoad) return;
                 DontDestroyOnLoad(gameObject);

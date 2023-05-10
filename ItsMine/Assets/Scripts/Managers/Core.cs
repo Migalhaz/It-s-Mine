@@ -12,8 +12,7 @@ namespace Game.Core
         Caneta,
         Caderno,
         Mochila,
-        Garrafa,
-        Casaco
+        Garrafa
     }
 
 

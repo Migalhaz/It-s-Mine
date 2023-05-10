@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Text;
 
 namespace Game.GameSystem.Itens
 {
@@ -31,9 +32,10 @@ namespace Game.GameSystem.Itens
 
         }
 
-        void Update()
+        void LateUpdate()
         {
             if (!inHand) return;
+
             transform.position = playerHand.position;
             transform.rotation = playerHand.rotation;
 
@@ -64,17 +66,37 @@ namespace Game.GameSystem.Itens
             itemManager.GetModel(item.ItemType, gameObject);
         }
 
-        void DropObject()
+        public void DropObject()
         {
             inHand = false;
+            itemManager.SetItemInHand(null);
+            onMouseButtonDown -= DropObject;
         }
 
         public void Interact()
         {
             Debug.Log($"{"Interact function".Color(Color.red)} is not implemented! Script: {"ItemScript".Color(Color.yellow)}");
+
+            Ui.UiManager.Instance.InspectItem(item.Description, this);
+            //if (itemManager.ItemInHand != null)
+            //{
+            //    itemManager.ItemInHand.DropObject();
+            //}
+            //itemManager.SetItemInHand(this);
+            //inHand = true;
+            //onMouseButtonDown += DropObject;
+            //This func must show itemDescription on UI
+        }
+
+        public void PickThisItem()
+        {
+            if (itemManager.ItemInHand != null)
+            {
+                itemManager.ItemInHand.DropObject();
+            }
+            itemManager.SetItemInHand(this);
             inHand = true;
             onMouseButtonDown += DropObject;
-            //This func must show itemDescription on UI
         }
     }
 }
@@ -119,6 +141,7 @@ public static class RangeExtend
 
 public static class StringExtend
 {
+    static StringBuilder stringBuilder = new StringBuilder();
     public static string Color(this string _string, Color _textColor)
     {
         return $"<color=#{ColorUtility.ToHtmlStringRGBA(_textColor)}>{_string}</color>";
@@ -155,16 +178,15 @@ public static class StringExtend
     {
         return $"{"ERROR:".Bold().Color(UnityEngine.Color.red)} {_string.Italic()}";
     }
-
-    public static string Teste(this string _string)
+    public static string Append(this string _string, params string[] _textToAppend)
     {
-        string _newString = "";
-
-        foreach (char c in _string.ToCharArray())
-        {
-            _newString += $"{c} ";
-        }
-        return _newString;
+        stringBuilder?.Clear();
+        stringBuilder ??= new();
+        stringBuilder.Append(_string);
+        _textToAppend.ToList().ForEach(x => stringBuilder.Append($" {x}"));
+        string _newText = stringBuilder.ToString();
+        stringBuilder.Clear();
+        return _newText;
     }
 }
 

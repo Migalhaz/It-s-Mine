@@ -20,7 +20,8 @@ namespace Game.GameSystem.Player
         [Header("Transforms")]
         [SerializeField] Transform playerTransform;
         [SerializeField] Transform camPivot;
-        [SerializeField] Transform cam;
+        [SerializeField] Transform mainCam;
+        [SerializeField] Transform itemRendererCam;
         Vector3 dir;
         Vector3 inputs;
         Rigidbody rig;
@@ -31,10 +32,9 @@ namespace Game.GameSystem.Player
 
         private void Awake()
         {
-            //playerInputManager ??= gameObject.AddComponent<PlayerInputs>();
             playerInputManager ??= gameObject.TryGetComponent(out PlayerInputs _newPlayerInput) ? _newPlayerInput : gameObject.AddComponent<PlayerInputs>();
             rig = GetComponent<Rigidbody>();
-            Cursor.lockState = CursorLockMode.Locked;
+            SetFollowMouse(true);
         }
 
         private void Update()
@@ -55,13 +55,26 @@ namespace Game.GameSystem.Player
 
         void Move()
         {
+            if (playerInputManager.PauseCamPressed()) SetFollowMouse(!followMouse);
+            if (!followMouse) return;
             playerTransform.Rotate(0, rX, 0, Space.World);
 
-            if (playerInputManager.PauseCamPressed()) followMouse = !followMouse;
-            if (!followMouse) return;
+            
 
-            cam.rotation = Quaternion.Lerp(cam.rotation, Quaternion.Euler(rY * mouseSense.y, playerTransform.eulerAngles.y, 0f), mouseSmoothness * Time.deltaTime);
+            mainCam.rotation = Quaternion.Lerp(mainCam.rotation, Quaternion.Euler(rY * mouseSense.y, playerTransform.eulerAngles.y, 0f), mouseSmoothness * Time.deltaTime);
+            //itemRendererCam.rotation = mainCam.rotation;
             camPivot.position = Vector3.Lerp(camPivot.position, playerTransform.position, moveSpeed * Time.deltaTime);
+
+            
+        }
+
+        public void SetFollowMouse(bool _newValue)
+        {
+            
+            followMouse = _newValue;
+
+            Cursor.lockState = followMouse ? CursorLockMode.Locked : CursorLockMode.Confined;
+            Ui.UiManager.Instance.SetCrosshairEnable(followMouse);
         }
 
         void InputListener()
