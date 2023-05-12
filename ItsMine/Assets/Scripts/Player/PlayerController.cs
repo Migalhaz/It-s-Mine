@@ -34,6 +34,11 @@ namespace Game.GameSystem.Player
         {
             playerInputManager ??= gameObject.TryGetComponent(out PlayerInputs _newPlayerInput) ? _newPlayerInput : gameObject.AddComponent<PlayerInputs>();
             rig = GetComponent<Rigidbody>();
+            
+        }
+
+        private void Start()
+        {
             SetFollowMouse(true);
         }
 
